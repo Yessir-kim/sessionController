@@ -1,4 +1,4 @@
-package temp
+package sc
 
 import(
 		"crypto/tls"
