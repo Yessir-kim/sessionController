@@ -17,10 +17,10 @@ type sessionManager struct {
 }
 
 func ListenAddr(addr string, tlsConf *tls.Config, config *server.Config) (sessionManager, error) {
-		sessManager := sessionManager {
-			server.ListenAddr(addr, tlsConf, config)
-			addr
-			make([]server.Session, 0)
+		sessManager := sessionManager{
+			server.ListenAddr(addr, tlsConf, config),
+			addr,
+			make([]server.Session, 0),
 			make([]server.Stream, 0)
 		}
 
