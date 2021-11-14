@@ -10,7 +10,7 @@ import (
 
 type sessionManager struct {
 		// server listener 
-		listener server.Listner
+		listener server.Listener
 		address string
 		sessionList []server.Session
 		streamList []server.Stream
@@ -24,7 +24,7 @@ func ListenAddr(addr string, tlsConf *tls.Config, config *server.Config) (sessio
 			make([]server.Stream, 0),
 		}
 
-		return sessManger
+		return sessManager
 }
 
 func (s *sessionManager) Accept(ctx context.Context) error {
