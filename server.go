@@ -21,7 +21,7 @@ func ListenAddr(addr string, tlsConf *tls.Config, config *server.Config) (sessio
 			server.ListenAddr(addr, tlsConf, config),
 			addr,
 			make([]server.Session, 0),
-			make([]server.Stream, 0)
+			make([]server.Stream, 0),
 		}
 
 		return sessManger
