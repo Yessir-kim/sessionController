@@ -16,9 +16,14 @@ type sessionManager struct {
 		streamList []server.Stream
 }
 
-func ListenAddr(addr string, tlsConf *tls.Config, config *server.Config) (sessionManager, error) {
+func ListenAddr(addr string, tlsConf *tls.Config, config *server.Config) (sessionManager) {
+		lis, err := server.ListenAddr(addr, tlsConf, config)
+		if err != nil {
+			panic(err)
+		}
+
 		sessManager := sessionManager{
-			server.ListenAddr(addr, tlsConf, config),
+			lis,
 			addr,
 			make([]server.Session, 0),
 			make([]server.Stream, 0),
