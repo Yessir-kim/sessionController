@@ -90,8 +90,8 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 
 func getNICInfo() (nicInfoList, error) {
 
-	nic1 := nicInfo{"wifi", "0.0.0.0"}
-	nic2 := nicInfo{"ethernet", "0.0.0.0"}
+	nic1 := nicInfo{"wifi", "192.168.0.66"}
+	nic2 := nicInfo{"ethernet", "203.252.121.211"}
 
 	n := nicInfoList{[]nicInfo{nic1, nic2}}
 
