@@ -3,26 +3,29 @@ package sc
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 
 	g "github.com/Yessir-kim/sessionController/var"
 )
 
 type packet struct {
-	ID			int
-	Sequence	uint
-	Payload		[]byte
+	ID       int
+	Sequence uint
+	Payload  []byte
 }
 
-func (s *sessionManager) Read(buf []byte) (int) {
+func (s *sessionManager) Read(buf []byte) int {
 	return s.buffer.read(buf)
 }
 
-func (s *sessionManager) Write(buf []byte) (int, error) {
+func (s *sessionManager) Write(buf []byte, w1 int, w2 int) (int, error) {
 	start, end, path := 0, 0, 0
+	cnt1, cnt2 := 0, 0 // for testing
+
+	stream1 := len(buf) / (w1 + w2) * w1
+	stream2 := len(buf) - stream1
 
 	for start < len(buf) {
-		if start + g.PAYLOAD_SIZE < len(buf) {
+		if start+g.PAYLOAD_SIZE < len(buf) {
 			end = start + g.PAYLOAD_SIZE
 			fmt.Printf("(Start, End) : (%d, %d)\n", start, end)
 		} else {
@@ -31,12 +34,38 @@ func (s *sessionManager) Write(buf []byte) (int, error) {
 		}
 
 		// s.streamList == # of stream
-		path = s.seq % len(s.streamList)
+		if len(s.streamList) == 1 {
+			path = 0
+		} else {
+			path = s.seq % len(s.streamList)
+
+			if w1 != w2 {
+				if path == 0 {
+					if stream1 < 0 {
+						path = 1
+						stream2 -= (end - start)
+						cnt2++
+					} else {
+						cnt1++
+					}
+					stream1 -= (end - start)
+				} else {
+					if stream2 < 0 {
+						path = 0
+						stream1 -= (end - start)
+						cnt1++
+					} else {
+						cnt2++
+					}
+					stream2 -= (end - start)
+				}
+			}
+		}
 
 		pkt := packet{
-			ID: path,
+			ID:       path,
 			Sequence: uint(s.seq),
-			Payload: buf[start:end],
+			Payload:  buf[start:end],
 		}
 
 		fmt.Printf("Payload size : %d\n", len(pkt.Payload))
@@ -55,13 +84,13 @@ func (s *sessionManager) Write(buf []byte) (int, error) {
 			panic(err)
 		}
 		fmt.Printf("Stream[%d] bytes size : %d\n", path, len(bytes))
+		fmt.Printf("Stream[0]: %d, Stream[1]: %d\n", cnt1, cnt2)
 
 		start = end
 		s.seq++
 	}
 
 	return len(buf), nil
-
 }
 
 func marshal(pkt packet) ([]byte, error) {
@@ -84,11 +113,4 @@ func unmarshal(data []byte) (packet, error) {
 	json.Unmarshal(data, &pkt)
 
 	return pkt, nil
-}
-
-func estPacketSize() (int) {
-
-	digits := math.Ceil(float64(g.PAYLOAD_SIZE / 3))
-
-	return 4 * int(digits) + 37 + 100 // + free space 100 
 }
