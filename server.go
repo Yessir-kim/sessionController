@@ -62,7 +62,7 @@ func (s *sessionManager) accept(ctx context.Context) {
 		go func() {
 			stream, err := sess.AcceptStream(ctx)
 			if err != nil {
-				panic(err)
+				fmt.Println(err)
 			}
 			s.streamList = append(s.streamList, stream)
 
