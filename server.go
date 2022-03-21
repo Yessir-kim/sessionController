@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	//g "github.com/Yessir-kim/sessionController/var"
 	server "github.com/lucas-clemente/quic-go"
 )
 
@@ -18,16 +17,17 @@ type sessionManager struct {
 	streamList  []server.Stream
 	buffer		*rebuffer
 	seq			int
+	// mp			bool
 }
 
 func ListenAddr(addr string, tlsConf *tls.Config, config *server.Config) sessionManager {
 	lis, err := server.ListenAddr(addr, tlsConf, config)
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Printf("server ListenAddr() error : %s\n", err)
 	}
-	fmt.Printf("Listener Creation\n")
+	fmt.Printf("Listener Creation (server)\n")
 
-	sessManager := sessionManager{
+	s := sessionManager{
 		listener:    lis,
 		address:     addr,
 		sessionList: make([]server.Session, 0),
@@ -36,7 +36,7 @@ func ListenAddr(addr string, tlsConf *tls.Config, config *server.Config) session
 		seq: 0,
 	}
 
-	return sessManager
+	return s
 }
 
 func (s *sessionManager) Accept(ctx context.Context) {
@@ -53,9 +53,11 @@ func (s *sessionManager) accept(ctx context.Context) {
 		}
 		s.sessionList = append(s.sessionList, sess)
 
-		fmt.Printf("Session Creation!\n")
-		//fmt.Printf("%s\n", sess.LocalAddr())
-		//fmt.Printf("%s\n", sess.RemoteAddr())
+		fmt.Printf("\tSession Creation! (server)\n")
+
+		// Local: Desktop, Remote: Laptop
+		// fmt.Printf("%s\n", sess.LocalAddr())
+		// fmt.Printf("%s\n", sess.RemoteAddr())
 
 		go func() {
 			stream, err := sess.AcceptStream(ctx)
@@ -64,35 +66,21 @@ func (s *sessionManager) accept(ctx context.Context) {
 			}
 			s.streamList = append(s.streamList, stream)
 
-			fmt.Printf("Stream Creation!\n")
+			fmt.Printf("\tStream[%d] Creation! (server)\n", len(s.streamList))
 
 			dec := json.NewDecoder(stream)
 			var p packet
 
-			for {
-				// buf := make([]byte, estPacketSize())
-
+			for
+			{
 				if err := dec.Decode(&p); err != nil {
 					continue
 				} else {
-					fmt.Printf("\tPacket id : %d\n", p.ID)
-					fmt.Printf("\tPacket seq : %d\n", p.Sequence)
-					fmt.Printf("\tPacket payload size : %d\n", len(p.Payload))
+					fmt.Printf("\t\tPacket id : %d (server)\n", p.ID)
+					fmt.Printf("\t\tPacket seq : %d (server)\n", p.Sequence)
+					fmt.Printf("\t\tPacket payload size : %d (server)\n", len(p.Payload))
 				}
 
-				/*
-				n, err := stream.Read(buf)
-				if err != nil {
-					fmt.Printf("Server Read() error : %s\n", err)
-				}
-
-				pkt, err := unmarshal(buf[:n])
-				
-				fmt.Printf("Read() %d size data\n", n)
-				fmt.Printf("\tPacket id : %d\n", pkt.ID)
-				fmt.Printf("\tPacket seq : %d\n", pkt.Sequence)
-				fmt.Printf("\tPakcet payload size : %d\n", len(pkt.Payload))
-				*/
 				for !s.buffer.store(p.Payload[:len(p.Payload)], int(p.Sequence)) {}
 			}
 		}()

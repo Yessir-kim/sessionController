@@ -21,11 +21,12 @@ func (s *sessionManager) Write(buf []byte, w1 int, w2 int) (int, error) {
 	start, end, path := 0, 0, 0
 	cnt1, cnt2 := 0, 0 // for testing
 
+	// weight of streams
 	stream1 := len(buf) / (w1 + w2) * w1
 	stream2 := len(buf) - stream1
 
 	for start < len(buf) {
-		if start+g.PAYLOAD_SIZE < len(buf) {
+		if start + g.PAYLOAD_SIZE < len(buf) {
 			end = start + g.PAYLOAD_SIZE
 			fmt.Printf("(Start, End) : (%d, %d)\n", start, end)
 		} else {
@@ -34,7 +35,7 @@ func (s *sessionManager) Write(buf []byte, w1 int, w2 int) (int, error) {
 		}
 
 		// s.streamList == # of stream
-		if len(s.streamList) == 1 {
+		if len(s.streamList) == 1 { // single path connection
 			path = 0
 		} else {
 			path = s.seq % len(s.streamList)

@@ -3,11 +3,11 @@ package sc
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"net"
 
 	client "github.com/lucas-clemente/quic-go"
-	//g "github.com/Yessir-kim/sessionController/var"
 )
 
 type nicInfoList struct {
@@ -25,7 +25,7 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 		return sessionManager{}, err
 	}
 
-	fmt.Printf("Remote Address : %s\n", addr)
+	fmt.Printf("Remote Address : %s (client)\n", addr)
 
 	s := sessionManager{
 		listener:    nil,
@@ -45,7 +45,7 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 				return sessionManager{}, err
 			}
 
-			fmt.Printf("\t\tFor %s address...\n", each.nicIP)
+			fmt.Printf("For %s address... (client)\n", each.nicIP)
 
 			ip4 := net.ParseIP(each.nicIP).To4()
 			udpConn, err := net.ListenUDP("udp", &net.UDPAddr{IP: ip4, Port: 0})
@@ -59,28 +59,33 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 			}
 			s.sessionList = append(s.sessionList, session)
 
-			fmt.Printf("\t\tSession Creation!\n")
-
-			stream, err := session.OpenStreamSync(context.Background())
-			if err != nil {
-				return sessionManager{}, err
-			}
-			s.streamList = append(s.streamList, stream)
-
-			fmt.Printf("\t\tStream Creation! [%T]\n", stream)
+			fmt.Printf("\tSession Creation! (client)\n")
 
 			go func() {
-				for {
-					// unknown packet size
-					buf := make([]byte, 1410)
-
-					n, err := stream.Read(buf)
+					stream, err := session.OpenStreamSync(context.Background())
 					if err != nil {
-						fmt.Printf("Client Read() error : %s\n", err)
+						panic(err)
 					}
 
-					fmt.Printf("Client Read() data size : %d\n", n)
-				}
+					s.streamList = append(s.streamList, stream)
+
+					fmt.Printf("\tStream[%d] Creation! (client)\n", len(s.streamList))
+
+					dec := json.NewDecoder(stream)
+					var p packet
+
+					for
+					{
+						if err := dec.Decode(&p); err != nil {
+							continue
+						} else {
+							fmt.Printf("\t\tPacket id : %d (client)\n", p.ID)
+							fmt.Printf("\t\tPacket seq : %d (client)\n", p.Sequence)
+							fmt.Printf("\t\tPacket payload size : %d (client)\n", len(p.Payload))
+						}
+
+						for !s.buffer.store(p.Payload[:len(p.Payload)], int(p.Sequence)) {}
+					}
 			}()
 		}
 	}
@@ -93,7 +98,7 @@ func getNICInfo() (nicInfoList, error) {
 	nic1 := nicInfo{"wifi", "0.0.0.0"}
 	nic2 := nicInfo{"ethernet", "0.0.0.0"}
 
-	n := nicInfoList{[]nicInfo{nic1, nic2}}
+	nics := nicInfoList{[]nicInfo{nic1, nic2}}
 
-	return n, nil
+	return nics, nil
 }

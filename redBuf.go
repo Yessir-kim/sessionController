@@ -93,7 +93,7 @@ func (b *rebuffer) read(buf []byte) (int) {
 			// To keep the underlying array, slice the slice to zero length.
 			b.rob = b.rob[:0]
 		} else {
-			temp :=  make([]byte, g.PAYLOAD_SIZE * g.SLICE_SIZE)
+			temp := make([]byte, g.PAYLOAD_SIZE * g.SLICE_SIZE)
 			copy(temp, b.rob[len(buf):])
 			b.rob = nil // free
 			b.rob = temp
