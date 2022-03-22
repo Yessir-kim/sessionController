@@ -61,32 +61,32 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 
 			fmt.Printf("\tSession Creation! (client)\n")
 
-			go func() {
-					stream, err := session.OpenStreamSync(context.Background())
-					if err != nil {
-						fmt.Println(err)
-					}
+			stream, err := session.OpenStreamSync(context.Background())
+			if err != nil {
+				fmt.Println(err)
+			}
 
-					s.streamList = append(s.streamList, stream)
+			s.streamList = append(s.streamList, stream)
 
-					fmt.Printf("\tStream[%d] Creation! (client)\n", len(s.streamList))
+			fmt.Printf("\tStream[%d] Creation! (client)\n", len(s.streamList))
 
-					dec := json.NewDecoder(stream)
-					var p packet
+			/* bug point (using go func())
+			dec := json.NewDecoder(stream)
+			var p packet
 
-					for
-					{
-						if err := dec.Decode(&p); err != nil {
-							continue
-						} else {
-							fmt.Printf("\t\tPacket id : %d (client)\n", p.ID)
-							fmt.Printf("\t\tPacket seq : %d (client)\n", p.Sequence)
-							fmt.Printf("\t\tPacket payload size : %d (client)\n", len(p.Payload))
-						}
+			for
+			{
+				if err := dec.Decode(&p); err != nil {
+					continue
+				} else {
+					fmt.Printf("\t\tPacket id : %d (client)\n", p.ID)
+					fmt.Printf("\t\tPacket seq : %d (client)\n", p.Sequence)
+					fmt.Printf("\t\tPacket payload size : %d (client)\n", len(p.Payload))
+				}
 
-						for !s.buffer.store(p.Payload[:len(p.Payload)], int(p.Sequence)) {}
-					}
-			}()
+				for !s.buffer.store(p.Payload[:len(p.Payload)], int(p.Sequence)) {}
+			}
+			*/
 		}
 	}
 
@@ -95,8 +95,8 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 
 func getNICInfo() (nicInfoList, error) {
 
-	nic1 := nicInfo{"wifi", "0.0.0.0"}
-	nic2 := nicInfo{"ethernet", "0.0.0.0"}
+	nic1 := nicInfo{"wifi", "192.168.0.182"}
+	nic2 := nicInfo{"ethernet", "203.252.121.224"}
 
 	nics := nicInfoList{[]nicInfo{nic1, nic2}}
 

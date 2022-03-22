@@ -25,7 +25,7 @@ func ListenAddr(addr string, tlsConf *tls.Config, config *server.Config) session
 	if err != nil {
 		fmt.Printf("server ListenAddr() error : %s\n", err)
 	}
-	fmt.Printf("Listener Creation (server)\n")
+	fmt.Printf("Listener Creation (server v2)\n")
 
 	s := sessionManager{
 		listener:    lis,
