@@ -3,7 +3,6 @@ package sc
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"net"
 
