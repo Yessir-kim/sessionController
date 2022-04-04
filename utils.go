@@ -9,6 +9,7 @@ import (
 
 type packet struct {
 	ID       int
+	Total	 int
 	Sequence uint
 	Payload  []byte
 }
@@ -19,11 +20,10 @@ func (s *sessionManager) Read(buf []byte) int {
 
 func (s *sessionManager) Write(buf []byte, w1 int, w2 int) (int, error) {
 	start, end, path := 0, 0, 0
-	cnt1, cnt2 := 0, 0 // for testing
 
 	// weight of streams
 	stream1 := len(buf) / (w1 + w2) * w1
-	stream2 := len(buf) - stream1
+	stream2 := len(buf) - stream1 // remainning data 
 
 	for start < len(buf) {
 		if start + g.PAYLOAD_SIZE < len(buf) {
@@ -38,25 +38,19 @@ func (s *sessionManager) Write(buf []byte, w1 int, w2 int) (int, error) {
 		if len(s.streamList) == 1 { // single path connection
 			path = 0
 		} else {
-			path = s.seq % len(s.streamList)
+			path = s.seq % len(s.streamList) // select the stream based on packet sequence
 
 			if w1 != w2 {
 				if path == 0 {
 					if stream1 < 0 {
 						path = 1
 						stream2 -= (end - start)
-						cnt2++
-					} else {
-						cnt1++
 					}
 					stream1 -= (end - start)
 				} else {
 					if stream2 < 0 {
 						path = 0
 						stream1 -= (end - start)
-						cnt1++
-					} else {
-						cnt2++
 					}
 					stream2 -= (end - start)
 				}
@@ -65,6 +59,7 @@ func (s *sessionManager) Write(buf []byte, w1 int, w2 int) (int, error) {
 
 		pkt := packet{
 			ID:       path,
+			Total:	  len(buf),
 			Sequence: uint(s.seq),
 			Payload:  buf[start:end],
 		}
@@ -85,7 +80,6 @@ func (s *sessionManager) Write(buf []byte, w1 int, w2 int) (int, error) {
 			panic(err)
 		}
 		fmt.Printf("Stream[%d] bytes size : %d\n", path, len(bytes))
-		fmt.Printf("Stream[0]: %d, Stream[1]: %d\n", cnt1, cnt2)
 
 		start = end
 		s.seq++
@@ -98,7 +92,7 @@ func marshal(pkt packet) ([]byte, error) {
 
 	/* prerequisite */
 	// First letter in the field name must be capitalized
-	// ID, Squence, Payload
+	// ID, Total, Squence, Payload
 
 	b, err := json.Marshal(pkt)
 	if err != nil {

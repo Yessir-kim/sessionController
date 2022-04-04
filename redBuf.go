@@ -3,6 +3,7 @@ package sc
 import (
 	// "fmt"
 	"sync"
+	"time"
 
 	g "github.com/Yessir-kim/sessionController/var"
 )
@@ -14,13 +15,14 @@ type rebuffer struct {
 	mark []bool
 	idx int
 	seq int
+	total int
 }
 
-func (b *rebuffer) store(buf []byte, seq int) bool {
+func (b *rebuffer) store(buf []byte, seq int, total int) bool {
 
 		b.mutex.Lock()
 
-		// fmt.Printf("\tb.seq : %d / seq :  %d\n", b.seq, seq)
+		b.total = total
 
 		if b.seq != seq {
 			idx := seq - (b.seq + 1)
@@ -77,20 +79,27 @@ func (b *rebuffer) read(buf []byte) (int) {
 
 		b.mutex.Lock()
 
+		// The remaining data that has not been received from the sender exists  
+		for b.total != b.idx {
+			b.mutex.Unlock()
+			time.Sleep(time.Second * 2)
+			b.mutex.Lock()
+		}
+
 		size := 0
 
-		if b.idx < len(buf) {
+		if b.idx < len(buf) { // less than buffer 
 			size = b.idx
 			copy(buf, b.rob[:b.idx])
 			b.idx = 0
-		} else {
+		} else { // greater than buffer
 			size = len(buf)
 			copy(buf, b.rob[:len(buf)])
-			b.idx -= len(buf)
+			b.idx -= len(buf) // maybe zero... 
 		}
 
 		if b.idx == 0 {
-			// To keep the underlying array, slice the slice to zero length.
+			// To keep the underlying array, slice the 'slice' to zero length.
 			b.rob = b.rob[:0]
 		} else {
 			temp := make([]byte, g.PAYLOAD_SIZE * g.SLICE_SIZE)
@@ -115,6 +124,7 @@ func New() *rebuffer {
 			mark: make([]bool, g.QUEUE_SIZE),
 			idx: 0,
 			seq: 0,
+			total: 0,
 		}
 
 		for i := 0; i < g.QUEUE_SIZE; i++ {

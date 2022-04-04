@@ -77,11 +77,12 @@ func (s *sessionManager) accept(ctx context.Context) {
 					continue
 				} else {
 					fmt.Printf("\t\tPacket id : %d (server)\n", p.ID)
+					fmt.Printf("\t\tPacket total size : %d (server)\n", p.Total)
 					fmt.Printf("\t\tPacket seq : %d (server)\n", p.Sequence)
 					fmt.Printf("\t\tPacket payload size : %d (server)\n", len(p.Payload))
 				}
 
-				for !s.buffer.store(p.Payload[:len(p.Payload)], int(p.Sequence)) {}
+				for !s.buffer.store(p.Payload[:len(p.Payload)], int(p.Sequence), int(p.Total)) {}
 			}
 		}()
 	}
