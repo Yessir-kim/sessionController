@@ -3,7 +3,6 @@ package sc
 import (
 	// "fmt"
 	"sync"
-	"time"
 
 	g "github.com/Yessir-kim/sessionController/var"
 )

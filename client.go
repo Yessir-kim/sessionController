@@ -62,7 +62,7 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 
 			stream, err := session.OpenStreamSync(context.Background())
 			if err != nil {
-				return sessionManger{}, err
+				return sessionManager{}, err
 			}
 
 			s.streamList = append(s.streamList, stream)
