@@ -29,7 +29,7 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 	s := sessionManager{
 		listener:    nil,
 		address:     addr,
-		sessionList: make([]client.Session, 0),
+		sessionList: make([]client.Connection, 0),
 		streamList:  make([]client.Stream, 0),
 		buffer: New(),
 	}

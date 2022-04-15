@@ -13,7 +13,7 @@ type sessionManager struct {
 	// server listener
 	listener    server.Listener
 	address     string
-	sessionList []server.Session
+	sessionList []server.Connection
 	streamList  []server.Stream
 	buffer		*rebuffer
 	seq			int
@@ -30,7 +30,7 @@ func ListenAddr(addr string, tlsConf *tls.Config, config *server.Config) session
 	s := sessionManager{
 		listener:    lis,
 		address:     addr,
-		sessionList: make([]server.Session, 0),
+		sessionList: make([]server.Connection, 0),
 		streamList:  make([]server.Stream, 0),
 		buffer: New(),
 		seq: 0,
