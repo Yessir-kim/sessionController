@@ -64,7 +64,7 @@ func (s *sessionManager) Write(buf []byte, w1 int, w2 int) (int, error) {
 			Payload:  buf[start:end],
 		}
 
-		fmt.Printf("Payload size : %d\n", len(pkt.Payload))
+		fmt.Printf("Payload size : %d (Write)\n", len(pkt.Payload))
 
 		bytes, err := marshal(pkt)
 		if err != nil {
@@ -79,7 +79,7 @@ func (s *sessionManager) Write(buf []byte, w1 int, w2 int) (int, error) {
 			fmt.Printf("Writing err : %s\n", err)
 			panic(err)
 		}
-		fmt.Printf("Stream[%d] bytes size : %d\n", path, len(bytes))
+		fmt.Printf("Stream[%d] bytes size : %d (Write)\n", path, len(bytes))
 
 		start = end
 		s.seq++

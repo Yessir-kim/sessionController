@@ -77,14 +77,10 @@ func (b *rebuffer) store(buf []byte, seq int, total int) bool {
 
 func (b *rebuffer) read(buf []byte) (int) {
 
-		b.mutex.Lock()
-
 		// The remaining data that has not been received from the sender exists  
-		for b.total != b.idx {
-			b.mutex.Unlock()
-			time.Sleep(time.Second * 2)
-			b.mutex.Lock()
-		}
+		for b.total != b.idx {} // need to fix to make more efficient 
+
+		b.mutex.Lock()
 
 		size := 0
 

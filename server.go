@@ -25,7 +25,7 @@ func ListenAddr(addr string, tlsConf *tls.Config, config *server.Config) session
 	if err != nil {
 		fmt.Printf("server ListenAddr() error : %s\n", err)
 	}
-	fmt.Printf("Listener Creation (server v2)\n")
+	fmt.Printf("Listener Creation! (ListenAddr)\n")
 
 	s := sessionManager{
 		listener:    lis,
@@ -53,11 +53,7 @@ func (s *sessionManager) accept(ctx context.Context) {
 		}
 		s.sessionList = append(s.sessionList, sess)
 
-		fmt.Printf("\tSession Creation! (server)\n")
-
-		// Local: Desktop, Remote: Laptop
-		// fmt.Printf("%s\n", sess.LocalAddr())
-		// fmt.Printf("%s\n", sess.RemoteAddr())
+		fmt.Printf("\tSession[%d] Creation! (ListenAddr)\n", len(s.sessionList))
 
 		go func() {
 			stream, err := sess.AcceptStream(ctx)
@@ -66,7 +62,7 @@ func (s *sessionManager) accept(ctx context.Context) {
 			}
 			s.streamList = append(s.streamList, stream)
 
-			fmt.Printf("\tStream[%d] Creation! (server)\n", len(s.streamList))
+			fmt.Printf("\tStream[%d] Creation! (ListenAddr)\n", len(s.streamList))
 
 			dec := json.NewDecoder(stream)
 			var p packet
@@ -76,12 +72,13 @@ func (s *sessionManager) accept(ctx context.Context) {
 				if err := dec.Decode(&p); err != nil {
 					continue
 				} else {
-					fmt.Printf("\t\tPacket id : %d (server)\n", p.ID)
-					fmt.Printf("\t\tPacket total size : %d (server)\n", p.Total)
-					fmt.Printf("\t\tPacket seq : %d (server)\n", p.Sequence)
-					fmt.Printf("\t\tPacket payload size : %d (server)\n", len(p.Payload))
+					fmt.Printf("\t\tPacket id : %d (ListenAddr)\n", p.ID)
+					fmt.Printf("\t\tPacket total size : %d (ListenAddr)\n", p.Total)
+					fmt.Printf("\t\tPacket seq : %d (ListenAddr)\n", p.Sequence)
+					fmt.Printf("\t\tPacket payload size : %d (ListenAddr)\n", len(p.Payload))
 				}
 
+				// never false 
 				for !s.buffer.store(p.Payload[:len(p.Payload)], int(p.Sequence), int(p.Total)) {}
 			}
 		}()

@@ -24,7 +24,7 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 		return sessionManager{}, err
 	}
 
-	fmt.Printf("Remote Address : %s (client)\n", addr)
+	fmt.Printf("Remote Address : %s (Dial)\n", addr)
 
 	s := sessionManager{
 		listener:    nil,
@@ -36,7 +36,7 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 
 	for i, each := range nics.lists {
 
-		fmt.Printf("NIC[%d] connection\n", i)
+		fmt.Printf("NIC[%d] connection (Dial)\n", i)
 
 		if each.nicType == "wifi" || each.nicType == "ethernet" {
 			udpAddr, err := net.ResolveUDPAddr("udp", addr)
@@ -44,7 +44,7 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 				return sessionManager{}, err
 			}
 
-			fmt.Printf("For %s address... (client)\n", each.nicIP)
+			fmt.Printf("For %s address... (Dial)\n", each.nicIP)
 
 			ip4 := net.ParseIP(each.nicIP).To4()
 			udpConn, err := net.ListenUDP("udp", &net.UDPAddr{IP: ip4, Port: 0})
@@ -58,16 +58,16 @@ func Dial(addr string, tlsConf *tls.Config) (sessionManager, error) {
 			}
 			s.sessionList = append(s.sessionList, session)
 
-			fmt.Printf("\tSession Creation! (client)\n")
+			fmt.Printf("\tSession[%d] Creation! (Dial)\n", len(s.sessionList))
 
 			stream, err := session.OpenStreamSync(context.Background())
 			if err != nil {
-				fmt.Println(err)
+				return sessionManger{}, err
 			}
 
 			s.streamList = append(s.streamList, stream)
 
-			fmt.Printf("\tStream[%d] Creation! (client)\n", len(s.streamList))
+			fmt.Printf("\tStream[%d] Creation! (Dial)\n", len(s.streamList))
 
 			/* bug point (using go func())
 			dec := json.NewDecoder(stream)
