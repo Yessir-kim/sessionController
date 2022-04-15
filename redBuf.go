@@ -119,7 +119,7 @@ func New() *rebuffer {
 			mark: make([]bool, g.QUEUE_SIZE),
 			idx: 0,
 			seq: 0,
-			total: 0,
+			total: -1,
 		}
 
 		for i := 0; i < g.QUEUE_SIZE; i++ {
